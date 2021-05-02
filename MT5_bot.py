@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pylab as pylab
 import backtrader as bt
-from strategy import GoldenCrossStrategy
+from strategy import GoldenCrossStrategy, GridTradingStrategy
 def set_figsize(width, height):
     pylab.rcParams['figure.figsize'] = width, height
 
@@ -21,7 +21,7 @@ cerebro = bt.Cerebro()
 cerebro.broker.set_cash(10000.0)
 cerebro.addsizer(bt.sizers.SizerFix, stake=1000)
 cerebro.adddata(data_feed)
-cerebro.addstrategy(GoldenCrossStrategy)
+cerebro.addstrategy(GridTradingStrategy)
 
 
 cerebro.run()
