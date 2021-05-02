@@ -1,1 +1,2 @@
-from strategy.GoldenCrossStrategy import GoldenCrossStrategy
+from .GoldenCrossStrategy import GoldenCrossStrategy
+from .GridTrandingStrategy import GridTradingStrategy

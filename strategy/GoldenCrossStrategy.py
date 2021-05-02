@@ -13,11 +13,10 @@ class GoldenCrossStrategy(bt.Strategy):
         self.fast_signal = bt.indicators.MovingAverageSimple(period=self.params.fast)
         self.slow_signal = bt.indicators.MovingAverageSimple(period=self.params.slow)
         self.cross_over = bt.indicators.CrossOver(self.fast_signal, self.slow_signal)
-        self.diff = bt.indicators.NonZeroDifference(self.fast_signal, self.slow_signal)
-
+        
     def next(self):
 
-        if self.diff > 0:
+        if self.cross_over > 0:
             self.log('buy')
             self.buy()
             # print(self.position)
