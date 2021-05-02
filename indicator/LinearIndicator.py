@@ -3,6 +3,7 @@ import datetime
 import time
 import math
 
+
 class LinearIndicator(bt.Indicator):
     '''
     This indicator shall produce a signal when price reaches a calculated trend line.
@@ -19,30 +20,21 @@ class LinearIndicator(bt.Indicator):
     '''
 
     lines = ('linear',)
-    params = (
-        ('x1', None),
-        ('y1', None),
-        ('x2', None),
-        ('y2', None),
-        ('start_datetime', None),
-        ('end_datetime', None)
-    )
 
-    def __init__(self):
-        if self.p.start_datetime is not None:
-            self.p.start_datetime = self.__convert_x_to_datetime(self.p.start_datetime)
-        else:
-            self.p.start_datetime = datetime.datetime.min
-        
-        if self.p.end_datetime is not None:
-            self.p.end_datetime = self.__convert_x_to_datetime(self.p.end_datetime)
-        else:
-            self.p.end_datetime = datetime.datetime.max
+    def __init__(self,
+                 x1=None,
+                 y1=None,
+                 x2=None,
+                 y2=None,
+                 start_datetime=datetime.datetime.min,
+                 end_datetime=datetime.datetime.max):
 
-        self.__define_linear_function()
+        self.start_datetime = self.__convert_x_to_datetime(start_datetime)
+        self.end_datetime = self.__convert_x_to_datetime(end_datetime)
+
+        self.__define_linear_function(x1, y1, x2, y2)
 
         self.plotinfo.subplot = False
-        self.plotinfo.plotlinelabels = True
 
     def __convert_x_to_datetime(self, x):
         if isinstance(x, datetime.datetime):
@@ -53,6 +45,7 @@ class LinearIndicator(bt.Indicator):
             except ValueError:
                 dt = datetime.datetime.strptime(x, '%Y-%m-%d')
             return dt
+
     def __convert_datetime_to_timestamp(self, dt):
         if dt == datetime.datetime.min:
             return 0.0
@@ -60,23 +53,24 @@ class LinearIndicator(bt.Indicator):
             return math.inf
         else:
             return time.mktime(dt.timetuple())
-    
-    def __define_linear_function(self):
-        self.p.x1 = self.__convert_x_to_datetime(self.p.x1)
-        self.p.x2 = self.__convert_x_to_datetime(self.p.x2)
 
-        x1_timestamp = self.__convert_datetime_to_timestamp(self.p.x1)
-        x2_timestamp = self.__convert_datetime_to_timestamp(self.p.x2)
+    def __define_linear_function(self, x1, y1, x2, y2):
+        self.x1 = self.__convert_x_to_datetime(x1)
+        self.x2 = self.__convert_x_to_datetime(x2)
+        self.y1 = y1
+        self.y2 = y2
+        x1_timestamp = self.__convert_datetime_to_timestamp(self.x1)
+        x2_timestamp = self.__convert_datetime_to_timestamp(self.x2)
 
         self.m = self.get_slope(
-            x1_timestamp, x2_timestamp, self.p.y1, self.p.y2)
-        self.B = self.get_y_intercept(self.m, x1_timestamp, self.p.y1)
+            x1_timestamp, x2_timestamp, self.y1, self.y2)
+        self.B = self.get_y_intercept(self.m, x1_timestamp, self.y1)
 
     def next(self):
         dt = self.data.datetime.datetime()
         date_timestamp = self.__convert_datetime_to_timestamp(dt)
 
-        if dt >= self.p.start_datetime and dt < self.p.end_datetime:
+        if dt >= self.start_datetime and dt < self.end_datetime:
             self.lines.linear[0] = self.get_y(date_timestamp)
         else:
             self.lines.linear[0] = math.nan
@@ -95,11 +89,14 @@ class LinearIndicator(bt.Indicator):
         Y = self.m * ts + self.B
         return Y
 
+
 class HorizontalLinearIndicator(LinearIndicator):
     params = (('y', None), )
-    def __init__(self):
-        self.p.x1 = datetime.datetime.min
-        self.p.y1 = self.p.y
-        self.p.x2 = datetime.datetime.max
-        self.p.y2 = self.p.y
-        super().__init__()
+
+    def __init__(self, 
+                 start_datetime=datetime.datetime.min,
+                 end_datetime=datetime.datetime.max):
+        super().__init__(x1=datetime.datetime.min, y1=self.p.y,
+                         x2=datetime.datetime.max, y2=self.p.y,
+                         start_datetime=start_datetime,
+                         end_datetime=end_datetime)
