@@ -42,6 +42,7 @@ class LinearIndicator(bt.Indicator):
         self.__define_linear_function()
 
         self.plotinfo.subplot = False
+        self.plotinfo.plotlinelabels = True
 
     def __convert_x_to_datetime(self, x):
         if isinstance(x, datetime.datetime):
@@ -53,7 +54,12 @@ class LinearIndicator(bt.Indicator):
                 dt = datetime.datetime.strptime(x, '%Y-%m-%d')
             return dt
     def __convert_datetime_to_timestamp(self, dt):
-        return time.mktime(dt.timetuple())
+        if dt == datetime.datetime.min:
+            return 0.0
+        elif dt == datetime.datetime.max:
+            return math.inf
+        else:
+            return time.mktime(dt.timetuple())
     
     def __define_linear_function(self):
         self.p.x1 = self.__convert_x_to_datetime(self.p.x1)
@@ -76,6 +82,8 @@ class LinearIndicator(bt.Indicator):
             self.lines.linear[0] = math.nan
 
     def get_slope(self, x1, x2, y1, y2):
+        if math.isclose(x1, 0.0) and math.isclose(x2, math.inf):
+            return 0.0
         m = (y2-y1)/(x2-x1)
         return m
 
@@ -86,3 +94,12 @@ class LinearIndicator(bt.Indicator):
     def get_y(self, ts):
         Y = self.m * ts + self.B
         return Y
+
+class HorizontalLinearIndicator(LinearIndicator):
+    params = (('y', None), )
+    def __init__(self):
+        self.p.x1 = datetime.datetime.min
+        self.p.y1 = self.p.y
+        self.p.x2 = datetime.datetime.max
+        self.p.y2 = self.p.y
+        super().__init__()
