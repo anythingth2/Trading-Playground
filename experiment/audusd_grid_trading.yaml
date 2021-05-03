@@ -1,0 +1,14 @@
+name: AUDUSD Grid trading
+dataset: dataset/AUDUSDm_d1.csv
+broker:
+  init_cash: 10000.0
+sizer:
+  default_stake: 1000
+strategies:
+  - strategy: GridTradingStrategy
+    name: grid_trading
+    params:
+      base_grid_price: 0.66
+      n_grid: 8
+      grid_size: 0.02
+      grid_share: 500

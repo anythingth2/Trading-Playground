@@ -1,0 +1,17 @@
+name: Template name
+dataset: Dataset path
+broker:
+  init_cash: 10000.0
+sizer:
+  default_stake: 1000
+strategies:
+  - strategy: GridTradingStrategy
+    name: grid_trading1
+    params:
+      grid_size: 0.02
+      base_grid_price: 0.66
+  - strategy: GoldenCrossStrategy
+    params:
+      fast_signal: 20
+
+  
