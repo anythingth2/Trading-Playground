@@ -35,7 +35,7 @@ class GridTradingStrategy(bt.Strategy):
             return HorizontalLinearIndicator(y=y, plot=self.p.plot_grid_bar, plotname=f'bar_{grid_no}')
 
         def create_cross_over(grid_bar):
-            return bt.indicators.CrossOver(self.data.close, grid_bar, plot=self.p.plot_cross_over, plotname=f'cross_{grid_bar.plotinfo.plotname}')
+            return bt.indicators.CrossOver(self.ma, grid_bar, plot=self.p.plot_cross_over, plotname=f'cross_{grid_bar.plotinfo.plotname}')
         self.grid_bars = [create_single_grid(i) for i in range(self.p.n_grid)]
         self.cross_overs = [create_cross_over(
             grid_bar) for grid_bar in self.grid_bars]
@@ -46,14 +46,15 @@ class GridTradingStrategy(bt.Strategy):
         if not np.all(cross_over_signals == 0):
             if np.max(cross_over_signals) > 0:  # Cross up signal
                 crossed_bar_index = np.argmax(cross_over_signals)
-                order = self.buy(size=self.p.grid_share)
+                order = self.buy(size=self.p.grid_share, price=self.ma[0])
 
-                print(order)
+                # print(order)
             elif np.min(cross_over_signals) < 0:  # Cross down signal
                 crossed_bar_index = np.argmin(cross_over_signals)
-                existing_buy_order_df = self.order_df[self.order_df['price'] < self.data.close[0]]
+                existing_buy_order_df = self.order_df[self.order_df['price'] < self.ma[0]]
+                print(existing_buy_order_df)
                 self.order_df.drop(index=existing_buy_order_df.index, inplace=True)
-                self.sell(size=existing_buy_order_df['share'].sum())
+                self.sell(size=existing_buy_order_df['share'].sum(), price=self.ma[0])
                 
 
     def notify_order(self, order):
@@ -66,7 +67,7 @@ class GridTradingStrategy(bt.Strategy):
                     'share': self.p.grid_share
                 }], index=pd.DatetimeIndex(data=[bt.num2date(order.executed.dt)], name='time'))
                 self.order_df = pd.concat([self.order_df, buy_order_df])
-                print(self.position)
+                # print(self.position)
             elif order.issell():
                 self.log('SELL EXECUTED, %.2f' % order.executed.price)
-                print(self.position)
+                # print(self.position)

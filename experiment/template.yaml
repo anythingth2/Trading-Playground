@@ -1,5 +1,7 @@
 name: Template name
 dataset: Dataset path
+start_date: 2021-01-01
+end_date: 
 broker:
   init_cash: 10000.0
 sizer:

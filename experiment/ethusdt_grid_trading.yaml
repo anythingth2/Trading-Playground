@@ -1,0 +1,17 @@
+name: ETH/USDT Grid trading
+dataset: dataset/ETHUSDT_1h.csv
+start_date: 2021-01-01
+end_date: 
+broker:
+  init_cash: 10000.0
+sizer:
+  default_stake: 1000
+strategies:
+  - strategy: GridTradingStrategy
+    name: grid_trading
+    params:
+      base_grid_price: 2200
+      n_grid: 32
+      grid_size: 25
+      grid_share: 0.1
+      plot_cross_over: false
