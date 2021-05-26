@@ -15,5 +15,4 @@ strategies:
   - strategy: GoldenCrossStrategy
     params:
       fast_signal: 20
-
-  
+plot: true

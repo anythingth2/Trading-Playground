@@ -1,0 +1,19 @@
+name: ETH/USDT H1 Regression
+dataset: dataset/Binance_ETHUSDT_1h.csv
+
+start_date: 2021-01-01
+end_date: 
+
+broker:
+  init_cash: 10000.0
+sizer:
+  default_stake: 0.1
+strategies:
+  - strategy: RegressionStrategy
+    name: regression_strategy
+    params:
+      model_path: bin/lightgbm_regression_h1-window48.pickle
+      window_size: 48
+
+plot: true
+  

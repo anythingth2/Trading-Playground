@@ -1,2 +1,3 @@
 from .GoldenCrossStrategy import GoldenCrossStrategy
 from .GridTradingStrategy import GridTradingStrategy
+from .RegressionStrategy import RegressionStrategy
