@@ -20,6 +20,11 @@ class LinearIndicator(bt.Indicator):
     '''
 
     lines = ('linear',)
+    plotlines = dict(
+        linear=dict(
+            _name='HI'
+        )
+    )
 
     def __init__(self,
                  x1=None,
@@ -35,6 +40,7 @@ class LinearIndicator(bt.Indicator):
         self.__define_linear_function(x1, y1, x2, y2)
 
         self.plotinfo.subplot = False
+        self.plotinfo.plotlinevalues = False
 
     def __convert_x_to_datetime(self, x):
         if isinstance(x, datetime.datetime):
@@ -93,7 +99,7 @@ class LinearIndicator(bt.Indicator):
 class HorizontalLinearIndicator(LinearIndicator):
     params = (('y', None), )
 
-    def __init__(self, 
+    def __init__(self,
                  start_datetime=datetime.datetime.min,
                  end_datetime=datetime.datetime.max):
         super().__init__(x1=datetime.datetime.min, y1=self.p.y,
