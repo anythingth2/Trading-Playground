@@ -63,10 +63,10 @@ def load_dataset():
     if 'real_volume' in df.columns:
         df.drop(columns=['real_volume'], inplace=True)
     df.rename(columns={'tick_volume': 'volume'}, inplace=True)
-    if config['start_date'] is not None:
-        df = df.loc[config['start_date']:]
-    if config['end_date'] is not None:
-        df = df.loc[: config['end_date']]
+    if config.get('start_date') is not None:
+        df = df.loc[config.get('start_date'):]
+    if config.get('end_date') is not None:
+        df = df.loc[: config.get('end_date')]
     return df
 
 
@@ -101,15 +101,16 @@ for strategy_config in config['strategies']:
     logging.info('Add strategy', strategy_config['name'])
     logging.info('params', strategy_config['params'])
     cerebro.addstrategy(
-        strategy=strategy_config['strategy'], tracker=order_history_tracker,**strategy_config['params'])
+        strategy=strategy_config['strategy'],
+        # tracker=order_history_tracker,
+        **strategy_config['params'])
 
 
 cerebro.run()
 ending_value = cerebro.broker.getvalue()
 print('ending value', ending_value)
-if config['plot']:
+if config.get('plot'):
     set_figsize(10, 8)
     # b = Bokeh(style='bar', plot_mode='single', scheme=Blackly())
     # cerebro.plot(b)
     cerebro.plot(iplot=True, style='bar')
-

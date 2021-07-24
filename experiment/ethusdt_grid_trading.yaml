@@ -15,3 +15,4 @@ strategies:
       grid_size: 25
       grid_share: 0.1
       plot_cross_over: false
+plot: true
