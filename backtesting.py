@@ -40,7 +40,7 @@ def init_logging():
     log_dir = log_root_dir / Path(args.config_path).stem
     log_dir.mkdir(exist_ok=True)
 
-    log_path = log_dir / f'{datetime.datetime.now()}.log'
+    log_path = log_dir / f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log'
     logging.basicConfig(
         filename=str(log_path),
         filemode='w',
