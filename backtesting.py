@@ -1,16 +1,19 @@
 import argparse
-
-import backtrader as bt
-from backtrader_plotting import Bokeh, OptBrowser
-from backtrader_plotting.schemes import Tradimo, Blackly
-import matplotlib.pylab as pylab
-import pandas as pd
-import yaml
-import importlib
 import datetime
+import importlib
 import logging
 from pathlib import Path
+
+import backtrader as bt
+import matplotlib.pylab as pylab
+import pandas as pd
+# import pyfolio as pf
+import yaml
+from backtrader_plotting import Bokeh, OptBrowser
+from backtrader_plotting.schemes import Blackly, Tradimo
+
 from util import OrderHistoryTracker, order_history_tracker
+
 # from strategy import GoldenCrossStrategy, GridTradingStrategy
 
 argparser = argparse.ArgumentParser()
@@ -80,7 +83,7 @@ df = load_dataset()
 logging.info(df.head())
 data_feed = bt.feeds.PandasData(dataname=df)
 
-cerebro = bt.Cerebro(stdstats=False)
+cerebro = bt.Cerebro(stdstats=False, runonce=False)
 cerebro.broker.set_coc(True)
 logging.info('init cash', config['broker']['init_cash'])
 cerebro.broker.set_cash(config['broker']['init_cash'])
@@ -105,8 +108,21 @@ for strategy_config in config['strategies']:
         # tracker=order_history_tracker,
         **strategy_config['params'])
 
+strategy_results = cerebro.run()
 
-cerebro.run()
+
+# pyfoliozer = strategy_results[0].analyzers.getbyname('pyfolio')
+# returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+
+# import pyfolio as pf
+# pf.create_full_tear_sheet(
+#     returns,
+#     positions=positions,
+#     transactions=transactions,
+#     # gross_lev=gross_lev,
+#     # live_start_date='2005-05-01',  # This date is sample specific
+#     round_trips=False,
+#     )
 ending_value = cerebro.broker.getvalue()
 print('ending value', ending_value)
 if config.get('plot'):

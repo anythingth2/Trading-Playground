@@ -20,11 +20,6 @@ class LinearIndicator(bt.Indicator):
     '''
 
     lines = ('linear',)
-    plotlines = dict(
-        linear=dict(
-            _name='HI'
-        )
-    )
 
     def __init__(self,
                  x1=None,
@@ -45,6 +40,8 @@ class LinearIndicator(bt.Indicator):
     def __convert_x_to_datetime(self, x):
         if isinstance(x, datetime.datetime):
             return x
+        if isinstance(x, (int, float)):
+            return bt.num2date(x)
         if isinstance(x, str):
             try:
                 dt = datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
@@ -95,6 +92,14 @@ class LinearIndicator(bt.Indicator):
         Y = self.m * ts + self.B
         return Y
 
+    def update_range(self, start_datetime=None, end_datetime=None):
+        if start_datetime is not None:
+            self.start_datetime = self.__convert_x_to_datetime(start_datetime)
+        if end_datetime is not None:
+            self.end_datetime = self.__convert_x_to_datetime(end_datetime)
+
+    def update_line(self, x1, y1, x2, y2):
+        self.__define_linear_function(x1, y1, x2, y2)
 
 class HorizontalLinearIndicator(LinearIndicator):
     params = (('y', None), )
@@ -106,3 +111,5 @@ class HorizontalLinearIndicator(LinearIndicator):
                          x2=datetime.datetime.max, y2=self.p.y,
                          start_datetime=start_datetime,
                          end_datetime=end_datetime)
+    def update_y(self, y):
+        self.update_line(x1=datetime.datetime.min, x2=datetime.datetime.max, y1=y, y2=y)
