@@ -1,0 +1,25 @@
+name: BTC/USDT Basic Grid
+dataset: dataset/BTCUSDT_1d.csv
+# start_date: 2021-01-01
+# end_date: 
+broker:
+  init_cash: 1000000.0
+sizer:
+  default_stake: 1000
+strategies:
+  - strategy: GridAdaptiveZoneStrategy
+    name: grid_adative_zone
+    params:
+      
+      n_grid: 8
+      zone:
+        start_price: 9000
+        high_side_ratio: 0.7
+        low_side_ratio: 0.3
+        
+      position:
+        type: FIX_CASH
+        position_cash: 100000
+      plot:
+        plot_cross_over: false
+plot: true
