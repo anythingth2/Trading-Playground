@@ -11,16 +11,29 @@ class GridBar:
                  grid_price,
                  grid_tp,
                  grid_sl,
-                 grid_indicator,
-                 grid_crossover
+                 grid_indicator
                  ):
         self.grid_no = grid_no
         self.grid_price = grid_price
         self.grid_tp = grid_tp
         self.grid_sl = grid_sl
         self.grid_indicator = grid_indicator
-        self.grid_crossover = grid_crossover
+        self.is_opened = False
+        self.buy_order = None
+        self.tp_order = None
+        self.sl_order = None
 
+    def open_order(self, buy_order, tp_order, sl_order):
+        self.is_opened = True
+        self.buy_order = buy_order
+        self.tp_order = tp_order
+        self.sl_order = sl_order
+    
+    def close_order(self):
+        self.is_opened = False
+        self.buy_order = None
+        self.tp_order = None
+        self.sl_order = None
 
 class GridBasicStrategy(bt.Strategy):
 
@@ -47,8 +60,6 @@ class GridBasicStrategy(bt.Strategy):
 
     def __init__(self):
         self.__create_grid_bars()
-        # self.order_df = pd.DataFrame(columns=['price', 'share'],
-        #                              index=pd.DatetimeIndex(data=[], name='time'))
 
     def __create_grid_bars(self):
         grid_size = (self.p.zone['top_grid_price'] -
@@ -60,8 +71,6 @@ class GridBasicStrategy(bt.Strategy):
             tp_price = self.p.zone['bottom_grid_price'] + grid_size*(grid_no+1)
             grid_line = HorizontalLinearIndicator(
                 y=price, plot=self.p.plot['plot_grid_bar'], plotname=f'bar_{grid_no}')
-            grid_crossover = bt.indicators.CrossOver(
-                self.data.close, grid_line, plot=self.p.plot['plot_cross_over'], plotname=f'cross_{grid_line.plotinfo.plotname}')
 
             grid = GridBar(
                 grid_no=grid_no,
@@ -69,16 +78,23 @@ class GridBasicStrategy(bt.Strategy):
                 grid_tp=tp_price,
                 grid_sl=1, # Never stop loss
                 grid_indicator=grid_line,
-                grid_crossover=grid_crossover
             )
+
+            self.open_grid(grid)
+
             self.grids.append(grid)
 
     def next(self):
-        for grid in self.grids:
-            if grid.grid_crossover[0] != 0:
-                self.notify_grid(grid)
+        # for grid in self.grids:
+        #     if grid.grid_crossover[0] != 0:
+        #         self.notify_grid(grid)
+        
+        available_grids = filter(lambda grid: not grid.is_opened, self.grids)
+        for grid in available_grids:
+            self.open_grid(grid)
 
-    def notify_grid(self, grid):
+
+    def open_grid(self, grid):
 
         size = self.p.position['position_cash'] / grid.grid_price
         buy_order, sl_order, tp_order = self.buy_bracket(size=size,
@@ -89,6 +105,7 @@ class GridBasicStrategy(bt.Strategy):
                                                          stopprice=grid.grid_sl,
                                                          stopexec=bt.Order.StopLimit
                                                          )
+        grid.open_order(buy_order, tp_order, sl_order)
         self.log(
             f'open buy #{buy_order.ref} {grid.grid_price:.3f}, tp #{tp_order.ref}: {grid.grid_tp:.3f}, sl #{sl_order.ref}: {grid.grid_sl}')
 
@@ -107,5 +124,10 @@ class GridBasicStrategy(bt.Strategy):
             elif order.issell():
                 self.log(
                     f'SELL EXECUTED, #{order.ref} {order.executed.price:.3f}')
+                
+                grid = next(filter(lambda grid: grid.is_opened and grid.tp_order.ref == order.ref, self.grids), None)
+                if grid:
+                    grid.close_order()
+
                 # print(self.position)
         pass

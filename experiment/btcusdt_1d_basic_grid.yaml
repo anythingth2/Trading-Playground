@@ -18,7 +18,7 @@ strategies:
         
       position:
         type: FIX_CASH
-        position_cash: 100000
+        position_cash: 15000
       plot:
         plot_cross_over: false
 plot: true

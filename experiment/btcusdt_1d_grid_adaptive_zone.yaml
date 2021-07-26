@@ -11,15 +11,14 @@ strategies:
     name: grid_adative_zone
     params:
       
-      n_grid: 8
+      n_grid: 200
       zone:
         start_price: 9000
         high_side_ratio: 0.7
         low_side_ratio: 0.3
-        
       position:
         type: FIX_CASH
-        position_cash: 100000
+        position_cash: 5000
       plot:
         plot_cross_over: false
 plot: true
